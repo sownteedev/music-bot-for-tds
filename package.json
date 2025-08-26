@@ -24,13 +24,14 @@
     "@distube/ytpl": "^1.2.3",
     "@distube/ytsr": "^2.0.4",
     "discord.js": "^14.14.1",
-    "distube": "^5.0.7",
+    "distube": "^4.0.4",
     "ffmpeg-static": "^5.2.0",
     "node-opus": "^0.3.3",
     "opusscript": "^0.0.8",
     "play-dl": "^1.9.7",
     "sodium": "^3.0.2",
     "tweetnacl": "^1.0.3",
+    "undici": "^7.15.0",
     "web-streams-polyfill": "^4.2.0",
     "ytdl-core": "^4.11.5"
   },
@@ -38,6 +39,6 @@
     "nodemon": "^3.0.2"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.0.0"
   }
 }

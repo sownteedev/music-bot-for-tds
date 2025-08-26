@@ -1,7 +1,24 @@
-// Polyfill for ReadableStream if not available
+// Polyfill for ReadableStream and File if not available
 if (typeof globalThis.ReadableStream === 'undefined') {
     const { ReadableStream } = require('web-streams-polyfill/ponyfill');
     globalThis.ReadableStream = ReadableStream;
+}
+
+if (typeof globalThis.File === 'undefined') {
+    try {
+        const { File } = require('undici');
+        globalThis.File = File;
+    } catch (e) {
+        // Fallback File implementation
+        globalThis.File = class File {
+            constructor(chunks, name, options = {}) {
+                this.name = name;
+                this.type = options.type || '';
+                this.lastModified = options.lastModified || Date.now();
+                this.chunks = chunks;
+            }
+        };
+    }
 }
 
 const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
