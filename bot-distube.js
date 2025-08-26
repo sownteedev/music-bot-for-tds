@@ -60,11 +60,36 @@ const client = new Client({
 });
 
 // Tạo DisTube instance với YouTube và Spotify plugins
-const ffmpegPath = process.env.NODE_ENV === 'production' 
-    ? require('ffmpeg-static') 
-    : '/usr/bin/ffmpeg';
+// Smart FFmpeg path detection
+let ffmpegPath;
+const { execSync } = require('child_process');
 
-console.log('🔧 FFmpeg path:', ffmpegPath);
+try {
+    // Try to find ffmpeg using 'which' command
+    ffmpegPath = execSync('which ffmpeg', { encoding: 'utf8' }).trim();
+    console.log('✅ Found FFmpeg using which command:', ffmpegPath);
+} catch (error) {
+    // Fallback to common paths
+    const commonPaths = ['/usr/bin/ffmpeg', '/usr/local/bin/ffmpeg', 'ffmpeg'];
+    
+    for (const path of commonPaths) {
+        try {
+            execSync(`${path} -version`, { stdio: 'ignore' });
+            ffmpegPath = path;
+            console.log('✅ Found FFmpeg at:', ffmpegPath);
+            break;
+        } catch (err) {
+            continue;
+        }
+    }
+    
+    if (!ffmpegPath) {
+        console.log('⚠️ FFmpeg not found, using default path');
+        ffmpegPath = 'ffmpeg'; // Let system PATH handle it
+    }
+}
+
+console.log('🔧 Final FFmpeg path:', ffmpegPath);
 console.log('🌍 Environment:', process.env.NODE_ENV || 'development');
 
 const distube = new DisTube(client, {
