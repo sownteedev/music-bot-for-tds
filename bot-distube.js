@@ -4,13 +4,25 @@ const { YouTubePlugin } = require('@distube/youtube');
 const { SpotifyPlugin } = require('@distube/spotify');
 const fs = require('fs');
 
-// Đọc config
+// Đọc config từ environment hoặc file
 let config;
-try {
-    config = JSON.parse(fs.readFileSync('./config.json', 'utf8'));
-} catch (error) {
-    console.error('❌ Không tìm thấy file config.json! Vui lòng tạo file config.json từ config.example.json');
-    process.exit(1);
+if (process.env.DISCORD_TOKEN) {
+    // Production: đọc từ environment variables
+    config = {
+        token: process.env.DISCORD_TOKEN,
+        prefix: process.env.PREFIX || '!',
+        clientId: process.env.CLIENT_ID || ''
+    };
+    console.log('📡 Using environment variables for config');
+} else {
+    // Development: đọc từ file config.json
+    try {
+        config = JSON.parse(fs.readFileSync('./config.json', 'utf8'));
+        console.log('📁 Using config.json file');
+    } catch (error) {
+        console.error('❌ Không tìm thấy file config.json! Vui lòng tạo file config.json từ config.example.json');
+        process.exit(1);
+    }
 }
 
 // Tạo client Discord
