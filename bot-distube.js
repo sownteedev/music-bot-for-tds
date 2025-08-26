@@ -62,17 +62,18 @@ const client = new Client({
 // Tạo DisTube instance với YouTube và Spotify plugins
 const distube = new DisTube(client, {
     plugins: [
-        new YouTubePlugin(),
+        new YouTubePlugin({
+            ytdlOptions: {
+                quality: 'highestaudio',
+                filter: 'audioonly',
+                dlChunkSize: 0,
+                highWaterMark: 1 << 25
+            }
+        }),
         new SpotifyPlugin()
     ],
     ffmpeg: {
         path: require('ffmpeg-static')
-    },
-    ytdlOptions: {
-        quality: 'highestaudio',
-        filter: 'audioonly',
-        dlChunkSize: 0,
-        highWaterMark: 1 << 25
     }
 });
 
