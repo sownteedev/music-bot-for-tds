@@ -24,7 +24,7 @@
     "@distube/ytpl": "^1.2.3",
     "@distube/ytsr": "^2.0.4",
     "discord.js": "^14.14.1",
-    "distube": "^4.0.4",
+    "distube": "^5.0.7",
     "ffmpeg-static": "^5.2.0",
     "node-opus": "^0.3.3",
     "opusscript": "^0.0.8",
