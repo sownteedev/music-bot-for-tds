@@ -1,0 +1,42 @@
+{
+  "name": "discord-music-bot",
+  "version": "1.0.0",
+  "description": "Bot Discord phát nhạc YouTube đơn giản",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js",
+    "dev": "nodemon bot.js"
+  },
+  "keywords": [
+    "discord",
+    "bot",
+    "music",
+    "youtube"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "@discordjs/opus": "^0.10.0",
+    "@discordjs/voice": "^0.16.1",
+    "@distube/spotify": "^2.0.2",
+    "@distube/youtube": "^1.0.4",
+    "@distube/ytdl-core": "^4.16.12",
+    "@distube/ytpl": "^1.2.3",
+    "@distube/ytsr": "^2.0.4",
+    "discord.js": "^14.14.1",
+    "distube": "^5.0.7",
+    "ffmpeg-static": "^5.2.0",
+    "node-opus": "^0.3.3",
+    "opusscript": "^0.0.8",
+    "play-dl": "^1.9.7",
+    "sodium": "^3.0.2",
+    "tweetnacl": "^1.0.3",
+    "ytdl-core": "^4.11.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
