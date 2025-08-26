@@ -1,8 +1,0 @@
-{
-  "build": {
-    "command": "npm install"
-  },
-  "deploy": {
-    "startCommand": "node bot-distube.js"
-  }
-}

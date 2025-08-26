@@ -4,9 +4,8 @@
   "description": "Bot Discord phát nhạc YouTube đơn giản",
   "main": "bot.js",
   "scripts": {
-    "start": "node bot-distube.js",
-    "dev": "nodemon bot-distube.js",
-    "install-ffmpeg": "./start.sh"
+    "start": "node install-ffmpeg.js && node bot-distube.js",
+    "dev": "nodemon bot-distube.js"
   },
   "keywords": [
     "discord",
