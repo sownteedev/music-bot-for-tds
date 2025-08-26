@@ -67,6 +67,12 @@ const distube = new DisTube(client, {
     ],
     ffmpeg: {
         path: require('ffmpeg-static')
+    },
+    ytdlOptions: {
+        quality: 'highestaudio',
+        filter: 'audioonly',
+        dlChunkSize: 0,
+        highWaterMark: 1 << 25
     }
 });
 
@@ -98,6 +104,10 @@ client.once('ready', () => {
 // DisTube Events
 distube
     .on('playSong', (queue, song) => {
+        console.log(`🎵 Playing: ${song.name}`);
+        console.log(`Voice channel: ${queue.voiceChannel?.name}`);
+        console.log(`Connection state: ${queue.voice?.connection?.state?.status}`);
+        
         // Auto shuffle logic - when queue restarts and auto shuffle is enabled
         if (queue.autoShuffle && queue.repeatMode === 2 && queue.songs.indexOf(song) === 0 && queue.songs.length > 1) {
             // Shuffle when starting the queue again (first song plays)
