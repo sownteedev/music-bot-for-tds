@@ -1,3 +1,9 @@
+// Polyfill for ReadableStream if not available
+if (typeof globalThis.ReadableStream === 'undefined') {
+    const { ReadableStream } = require('web-streams-polyfill/ponyfill');
+    globalThis.ReadableStream = ReadableStream;
+}
+
 const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 const { DisTube } = require('distube');
 const { YouTubePlugin } = require('@distube/youtube');
@@ -572,26 +578,8 @@ process.on('unhandledRejection', error => {
     console.error('Unhandled promise rejection:', error);
 });
 
-// Tạo HTTP server cho Vercel
-const server = http.createServer((req, res) => {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({
-        status: 'Discord Music Bot is running',
-        uptime: process.uptime(),
-        memory: process.memoryUsage(),
-        guilds: client.guilds?.cache?.size || 0,
-        users: client.users?.cache?.size || 0,
-        timestamp: new Date().toISOString()
-    }));
-});
-
 // Đăng nhập bot
 client.login(config.token).catch(error => {
     console.error('❌ Không thể đăng nhập bot! Kiểm tra lại token:', error);
     process.exit(1);
 });
-
-// Export for Vercel
-module.exports = (req, res) => {
-    server.emit('request', req, res);
-};
