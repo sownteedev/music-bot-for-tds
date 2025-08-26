@@ -64,7 +64,10 @@ const distube = new DisTube(client, {
     plugins: [
         new YouTubePlugin(),
         new SpotifyPlugin()
-    ]
+    ],
+    ffmpeg: {
+        path: require('ffmpeg-static')
+    }
 });
 
 // Hàm kiểm tra URL YouTube
