@@ -74,11 +74,7 @@ const distube = new DisTube(client, {
     ],
     ffmpeg: {
         path: require('ffmpeg-static')
-    },
-    joinNewVoiceChannel: true,
-    leaveOnEmpty: false,
-    leaveOnFinish: false,
-    leaveOnStop: false
+    }
 });
 
 // Hàm kiểm tra URL YouTube
@@ -243,11 +239,19 @@ client.on('messageCreate', async (message) => {
             }
             
             try {
-                await distube.play(message.member.voice.channel, query, {
+                // Add timeout and retry logic for voice connection
+                const playPromise = distube.play(message.member.voice.channel, query, {
                     member: message.member,
                     textChannel: message.channel,
                     message
                 });
+                
+                // Set timeout for play command
+                const timeoutPromise = new Promise((_, reject) => {
+                    setTimeout(() => reject(new Error('Play timeout after 45 seconds')), 45000);
+                });
+                
+                await Promise.race([playPromise, timeoutPromise]);
                 
                 // Xóa thông báo đang xử lý nếu có
                 if (processingMessage) {
@@ -259,6 +263,15 @@ client.on('messageCreate', async (message) => {
                 // Xóa thông báo đang xử lý nếu có
                 if (processingMessage) {
                     processingMessage.delete().catch(() => {});
+                }
+                
+                if (error.message.includes('VOICE_CONNECT_FAILED') || error.message.includes('timeout')) {
+                    message.channel.send('⚠️ **Lỗi kết nối voice channel!**\n' +
+                                       '• Đảm bảo bot có quyền **Connect** và **Speak**\n' +
+                                       '• Thử voice channel khác\n' +
+                                       '• Server có thể có vấn đề network với Discord voice\n' +
+                                       '• Thử lại sau vài phút');
+                    return;
                 }
                 
                 const urlType = getUrlType(query);
