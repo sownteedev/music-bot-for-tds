@@ -5,7 +5,8 @@
   "main": "bot.js",
   "scripts": {
     "start": "node bot-distube.js",
-    "dev": "nodemon bot-distube.js"
+    "dev": "nodemon bot-distube.js",
+    "install-ffmpeg": "./start.sh"
   },
   "keywords": [
     "discord",
