@@ -65,15 +65,13 @@ const distube = new DisTube(client, {
         new YouTubePlugin({
             ytdlOptions: {
                 quality: 'highestaudio',
-                filter: 'audioonly',
-                dlChunkSize: 0,
-                highWaterMark: 1 << 25
+                filter: 'audioonly'
             }
         }),
         new SpotifyPlugin()
     ],
     ffmpeg: {
-        path: require('ffmpeg-static')
+        path: '/usr/bin/ffmpeg'  // Use system ffmpeg instead of ffmpeg-static
     }
 });
 
