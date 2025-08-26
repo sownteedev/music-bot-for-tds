@@ -60,6 +60,13 @@ const client = new Client({
 });
 
 // Tạo DisTube instance với YouTube và Spotify plugins
+const ffmpegPath = process.env.NODE_ENV === 'production' 
+    ? require('ffmpeg-static') 
+    : '/usr/bin/ffmpeg';
+
+console.log('🔧 FFmpeg path:', ffmpegPath);
+console.log('🌍 Environment:', process.env.NODE_ENV || 'development');
+
 const distube = new DisTube(client, {
     plugins: [
         new YouTubePlugin({
@@ -71,7 +78,7 @@ const distube = new DisTube(client, {
         new SpotifyPlugin()
     ],
     ffmpeg: {
-        path: '/usr/bin/ffmpeg'  // Use system ffmpeg instead of ffmpeg-static
+        path: ffmpegPath
     }
 });
 
