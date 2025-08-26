@@ -1,8 +1,5 @@
 [build]
-builder = "heroku/buildpacks:20"
+builder = "nixpacks"
 
-[[build.buildpacks]]
-url = "https://github.com/jonathanong/heroku-buildpack-ffmpeg-latest.git"
-
-[[build.buildpacks]]
-url = "heroku/nodejs"
+[build.nixpacks]
+packages = ["nodejs", "ffmpeg"]
