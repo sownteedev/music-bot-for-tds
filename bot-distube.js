@@ -74,7 +74,11 @@ const distube = new DisTube(client, {
     ],
     ffmpeg: {
         path: require('ffmpeg-static')
-    }
+    },
+    joinNewVoiceChannel: true,
+    leaveOnEmpty: false,
+    leaveOnFinish: false,
+    leaveOnStop: false
 });
 
 // Hàm kiểm tra URL YouTube
@@ -108,6 +112,14 @@ distube
         console.log(`🎵 Playing: ${song.name}`);
         console.log(`Voice channel: ${queue.voiceChannel?.name}`);
         console.log(`Connection state: ${queue.voice?.connection?.state?.status}`);
+        console.log(`Stream info:`, song.stream);
+        
+        // Monitor voice connection
+        if (queue.voice?.connection) {
+            queue.voice.connection.on('stateChange', (oldState, newState) => {
+                console.log(`Voice connection: ${oldState.status} -> ${newState.status}`);
+            });
+        }
         
         // Auto shuffle logic - when queue restarts and auto shuffle is enabled
         if (queue.autoShuffle && queue.repeatMode === 2 && queue.songs.indexOf(song) === 0 && queue.songs.length > 1) {
