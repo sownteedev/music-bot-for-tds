@@ -8,6 +8,9 @@ config.json
 *.log
 logs/
 
+# ytdl-core debug files
+*-watch.html
+
 # Runtime data
 pids/
 *.pid
