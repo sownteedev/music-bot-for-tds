@@ -4,18 +4,18 @@ function installFFmpeg() {
     try {
         // Check if ffmpeg exists
         execSync('which ffmpeg', { stdio: 'ignore' });
-        console.log('✅ FFmpeg already installed');
+        // FFmpeg already available
         return;
     } catch (error) {
-        console.log('⚠️ FFmpeg not found, attempting to install...');
+        // FFmpeg not found, attempt installation
     }
 
     try {
         // Try to install ffmpeg using apt-get (Ubuntu/Debian)
-        execSync('apt-get update && apt-get install -y ffmpeg', { stdio: 'inherit' });
+        execSync('apt-get update && apt-get install -y ffmpeg', { stdio: 'pipe' });
         console.log('✅ FFmpeg installed successfully');
     } catch (error) {
-        console.log('❌ Failed to install FFmpeg:', error.message);
+        console.error('❌ Failed to install FFmpeg:', error.message);
         console.log('💡 Try running: sudo apt-get install ffmpeg');
     }
 }

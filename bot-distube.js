@@ -37,12 +37,12 @@ if (process.env.DISCORD_TOKEN) {
         prefix: process.env.PREFIX || '!',
         clientId: process.env.CLIENT_ID || ''
     };
-    console.log('📡 Using environment variables for config');
+    // Using environment variables for config
 } else {
     // Development: đọc từ file config.json
     try {
         config = JSON.parse(fs.readFileSync('./config.json', 'utf8'));
-        console.log('📁 Using config.json file');
+        // Using config.json file
     } catch (error) {
         console.error('❌ Không tìm thấy file config.json! Vui lòng tạo file config.json từ config.example.json');
         process.exit(1);
@@ -64,10 +64,34 @@ const client = new Client({
 let ffmpegPath;
 const { execSync } = require('child_process');
 
+// Logging wrapper to reduce spam in production
+const logger = {
+    log: (...args) => {
+        // Only log in development or important messages
+        if (process.env.NODE_ENV !== 'production') {
+            console.log(...args);
+        }
+    },
+    error: (...args) => {
+        // Always log errors
+        console.error(...args);
+    },
+    warn: (...args) => {
+        // Always log warnings
+        console.warn(...args);
+    },
+    info: (...args) => {
+        // Only important info in production
+        if (process.env.NODE_ENV !== 'production' || args[0].includes('✅') || args[0].includes('❌')) {
+            console.log(...args);
+        }
+    }
+};
+
 try {
     // Try to find ffmpeg using 'which' command
     ffmpegPath = execSync('which ffmpeg', { encoding: 'utf8' }).trim();
-    console.log('✅ Found FFmpeg using which command:', ffmpegPath);
+    // Found FFmpeg using which command
 } catch (error) {
     // Fallback to common paths
     const commonPaths = ['/usr/bin/ffmpeg', '/usr/local/bin/ffmpeg', 'ffmpeg'];
@@ -76,7 +100,7 @@ try {
         try {
             execSync(`${path} -version`, { stdio: 'ignore' });
             ffmpegPath = path;
-            console.log('✅ Found FFmpeg at:', ffmpegPath);
+            // Found FFmpeg at specified path
             break;
         } catch (err) {
             continue;
@@ -84,13 +108,12 @@ try {
     }
     
     if (!ffmpegPath) {
-        console.log('⚠️ FFmpeg not found, using default path');
+        // FFmpeg not found, using default path
         ffmpegPath = 'ffmpeg'; // Let system PATH handle it
     }
 }
 
-console.log('🔧 Final FFmpeg path:', ffmpegPath);
-console.log('🌍 Environment:', process.env.NODE_ENV || 'development');
+// FFmpeg configured for production
 
 const distube = new DisTube(client, {
     plugins: [
@@ -128,24 +151,15 @@ function getUrlType(url) {
 
 // Event khi bot sẵn sàng
 client.once('ready', () => {
-    console.log(`✅ Bot đã sẵn sàng! Đăng nhập với tên: ${client.user.tag}`);
+    logger.info(`✅ Bot đã sẵn sàng! Đăng nhập với tên: ${client.user.tag}`);
     client.user.setActivity('🎵 YouTube & Spotify Music', { type: 'LISTENING' });
 });
 
 // DisTube Events
 distube
     .on('playSong', (queue, song) => {
-        console.log(`🎵 Playing: ${song.name}`);
-        console.log(`Voice channel: ${queue.voiceChannel?.name}`);
-        console.log(`Connection state: ${queue.voice?.connection?.state?.status}`);
-        console.log(`Stream info:`, song.stream);
-        
-        // Monitor voice connection
-        if (queue.voice?.connection) {
-            queue.voice.connection.on('stateChange', (oldState, newState) => {
-                console.log(`Voice connection: ${oldState.status} -> ${newState.status}`);
-            });
-        }
+        // Only log in development
+        logger.log(`🎵 Playing: ${song.name}`);
         
         // Auto shuffle logic - when queue restarts and auto shuffle is enabled
         if (queue.autoShuffle && queue.repeatMode === 2 && queue.songs.indexOf(song) === 0 && queue.songs.length > 1) {
