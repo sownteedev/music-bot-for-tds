@@ -27,6 +27,7 @@ const { YouTubePlugin } = require('@distube/youtube');
 const { SpotifyPlugin } = require('@distube/spotify');
 const fs = require('fs');
 const http = require('http');
+const playdl = require('play-dl');
 
 // Đọc config từ environment hoặc file
 let config;
@@ -158,6 +159,35 @@ function getUrlType(url) {
     if (isValidYouTubeUrl(url)) return 'YouTube';
     if (isValidSpotifyUrl(url)) return 'Spotify';
     return 'Unknown';
+}
+
+// Fallback function using play-dl when ytdl-core fails
+async function tryPlayWithFallback(voiceChannel, query, options) {
+    try {
+        // First attempt with DisTube (ytdl-core)
+        return await distube.play(voiceChannel, query, options);
+    } catch (error) {
+        logger.error('DisTube failed, trying play-dl fallback:', error.message);
+        
+        // If it's a YouTube URL and ytdl-core failed, try play-dl
+        if (isValidYouTubeUrl(query)) {
+            try {
+                // Get video info using play-dl
+                const info = await playdl.video_info(query);
+                if (info && info.video_details) {
+                    // Try to play using the title as search query
+                    const searchQuery = info.video_details.title;
+                    logger.log(`Fallback: searching for "${searchQuery}"`);
+                    return await distube.play(voiceChannel, searchQuery, options);
+                }
+            } catch (fallbackError) {
+                logger.error('play-dl fallback also failed:', fallbackError.message);
+            }
+        }
+        
+        // If all fails, re-throw the original error
+        throw error;
+    }
 }
 
 // Event khi bot sẵn sàng
@@ -311,8 +341,8 @@ client.on('messageCreate', async (message) => {
             }
             
             try {
-                // Add timeout and retry logic for voice connection
-                const playPromise = distube.play(message.member.voice.channel, query, {
+                // Use fallback function that tries ytdl-core first, then play-dl
+                const playPromise = tryPlayWithFallback(message.member.voice.channel, query, {
                     member: message.member,
                     textChannel: message.channel,
                     message
@@ -342,6 +372,13 @@ client.on('messageCreate', async (message) => {
                     message.channel.send('❌ **Video yêu cầu xác minh tuổi!**\n' +
                                        '• Thử video khác không bị giới hạn tuổi\n' +
                                        '• Sử dụng tìm kiếm thay vì URL trực tiếp');
+                    return;
+                } else if (error.message.includes('Error when parsing watch.html') || error.message.includes('YouTube made a change')) {
+                    message.channel.send('❌ **YouTube đã thay đổi format!**\n' +
+                                       '• Đây là lỗi tạm thời của ytdl-core\n' +
+                                       '• Thử tìm kiếm bài hát bằng **tên** thay vì URL\n' +
+                                       '• Ví dụ: `!play tên bài hát - tên ca sĩ`\n' +
+                                       '• Bot sẽ tự động tìm và phát bài tương tự');
                     return;
                 } else if (error.name === 'PlayError' || error.message.includes('Video unavailable')) {
                     message.channel.send('❌ **Không thể phát video này!**\n' +
