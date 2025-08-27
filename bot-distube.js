@@ -120,7 +120,18 @@ const distube = new DisTube(client, {
         new YouTubePlugin({
             ytdlOptions: {
                 quality: 'highestaudio',
-                filter: 'audioonly'
+                filter: 'audioonly',
+                requestOptions: {
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                        'Accept-Language': 'en-US,en;q=0.9',
+                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                        'Accept-Encoding': 'gzip, deflate',
+                        'DNT': '1',
+                        'Connection': 'keep-alive',
+                        'Upgrade-Insecure-Requests': '1'
+                    }
+                }
             }
         }),
         new SpotifyPlugin()
@@ -229,9 +240,26 @@ distube
         queue.textChannel.send({ embeds: [embed] });
     })
     .on('error', (channel, error) => {
-        console.error('DisTube Error:', error);
-        if (channel) {
-            channel.send('❌ Có lỗi xảy ra khi phát nhạc! Vui lòng thử lại.');
+        logger.error('DisTube Error:', error.name, error.message);
+        
+        let errorMessage = '❌ Có lỗi xảy ra khi phát nhạc!';
+        
+        if (error.name === 'PlayError') {
+            errorMessage = '❌ Không thể phát video này! Có thể video bị hạn chế hoặc không khả dụng.';
+        } else if (error.message.includes('Sign in to confirm')) {
+            errorMessage = '❌ Video yêu cầu xác minh tuổi hoặc đăng nhập YouTube!';
+        } else if (error.message.includes('Video unavailable')) {
+            errorMessage = '❌ Video không khả dụng hoặc đã bị xóa!';
+        } else if (error.message.includes('Private video')) {
+            errorMessage = '❌ Video này ở chế độ riêng tư!';
+        }
+        
+        if (channel && channel.send) {
+            try {
+                channel.send(errorMessage);
+            } catch (err) {
+                logger.error('Failed to send error message:', err);
+            }
         }
     })
     .on('empty', (queue) => {
@@ -302,14 +330,26 @@ client.on('messageCreate', async (message) => {
                     processingMessage.delete().catch(() => {});
                 }
             } catch (error) {
-                console.error('Play Error:', error);
+                logger.error('Play Error:', error.name, error.message);
                 
                 // Xóa thông báo đang xử lý nếu có
                 if (processingMessage) {
                     processingMessage.delete().catch(() => {});
                 }
                 
-                if (error.message.includes('VOICE_CONNECT_FAILED') || error.message.includes('timeout')) {
+                // Handle specific error types
+                if (error.message.includes('Sign in to confirm')) {
+                    message.channel.send('❌ **Video yêu cầu xác minh tuổi!**\n' +
+                                       '• Thử video khác không bị giới hạn tuổi\n' +
+                                       '• Sử dụng tìm kiếm thay vì URL trực tiếp');
+                    return;
+                } else if (error.name === 'PlayError' || error.message.includes('Video unavailable')) {
+                    message.channel.send('❌ **Không thể phát video này!**\n' +
+                                       '• Video có thể đã bị xóa hoặc riêng tư\n' +
+                                       '• Thử tìm kiếm bài hát bằng tên thay vì URL\n' +
+                                       '• Hoặc thử video/playlist khác');
+                    return;
+                } else if (error.message.includes('VOICE_CONNECT_FAILED') || error.message.includes('timeout')) {
                     message.channel.send('⚠️ **Lỗi kết nối voice channel!**\n' +
                                        '• Đảm bảo bot có quyền **Connect** và **Speak**\n' +
                                        '• Thử voice channel khác\n' +
